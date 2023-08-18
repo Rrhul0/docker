@@ -1,0 +1,61 @@
+version: '2'
+
+services:
+    pihole:
+        container_name: pihole_unbound
+        image: pihole/pihole:latest
+        hostname: PIHOLE_MUMBAI
+        ports:
+            - '53:53/tcp'
+            - '53:53/udp'
+            - '8090:8090/tcp'
+        networks:
+            default:
+                ipv4_address: 172.28.0.2
+        environment:
+            TZ: 'Asia/Kolkata'
+            WEBPASSWORD: 'pihole14178971'
+            WEB_PORT: 8090
+            PIHOLE_DNS_: '172.28.0.3;172.28.0.3'
+            FTLCONF_LOCAL_IPV4: 10.100.0.1
+        volumes:
+            - '../docker-data/pihole-docker/etc-pihole:/etc/pihole'
+            - '../docker-data/pihole-docker/etc-dnsmasq:/etc/dnsmasq.d'
+            - '../docker-data/pihole-docker/resolv.conf:/etc/resolv.conf'
+        restart: unless-stopped
+
+    unbound:
+        container_name: unbound_redis
+        image: rrhul0/unbound-redis:latest
+        networks:
+            default:
+                ipv4_address: 172.28.0.3
+        healthcheck:
+            test: ['CMD', 'dig', '-p', '53', 'dnssec.works', '@127.0.0.1']
+            interval: 30s
+            timeout: 30s
+            retries: 3
+            start_period: 30s
+        volumes:
+            #      - ./root.hints:/etc/unbound/root.hints
+            - ./unbound.conf.d:/etc/unbound/custom.conf.d
+    redis:
+        image: redis:alpine
+        container_name: redis
+        volumes:
+            # - ./redis.conf:/etc/redis.conf
+            - ./redis.conf:/usr/local/etc/redis/redis.conf
+            - ../docker-data/pihole-docker/redis:/data
+        command: redis-server /usr/local/etc/redis/redis.conf
+        networks:
+            default:
+                ipv4_address: 172.28.0.4
+        restart: unless-stopped
+
+networks:
+    default:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.28.0.0/24
+                  gateway: 172.28.0.1

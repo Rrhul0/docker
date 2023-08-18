@@ -1,0 +1,80 @@
+version: '3'
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ../docker-data/gluetun/protonvpn-configs:/gluetun/custom-configs:ro
+    environment:
+      - OPENVPN_USER=Ktb4d2wX8TDWv61g
+      - OPENVPN_PASSWORD=o6eKAEcCgfL2aqJX1dul7OW6PlytfapK
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=openvpn
+      - OPENVPN_CUSTOM_CONFIG=/gluetun/custom-configs/nl-free-88.protonvpn.net.udp.ovpn
+#      - SERVER_COUNTRIES=Netherlands
+      - LOG_LEVEL=debug
+#      - TZ=Asia/Kolkata
+#      - FREE_ONLY=on
+    ports:
+      - 9005:9000/tcp
+      - 6801:6800
+      - 3388:3389
+
+  Aria2-Pro:
+    container_name: aria2-pro
+    image: p3terx/aria2-pro
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=0
+      - PGID=0
+      - UMASK_SET=022
+      - RPC_SECRET=P3TERX
+      - RPC_PORT=6800
+      - LISTEN_PORT=6888
+      - DISK_CACHE=64M
+      - IPV6_MODE=true
+#      - UPDATE_TRACKERS=true
+#      - CUSTOM_TRACKER_URL=
+      - TZ=Asia/Kolkata
+    volumes:
+      - ${PWD}/aria2-config:/config
+      - ${PWD}/aria2-downloads:/downloads
+
+  rdesktop:
+    image: lscr.io/linuxserver/rdesktop:latest
+    container_name: rdesktopglue
+#    security_opt:
+#      - seccomp:unconfined #optional
+#    environment:
+#      - PUID=1001
+#      - PGID=1001
+#      - TZ=Etc/UTC
+    network_mode: "service:gluetun"
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock #optional
+#      - /path/to/data:/config #optional
+ #   ports:
+ #     - 3389:3389
+#    devices:
+#      - /dev/dri:/dev/dri #optional
+    shm_size: "1gb" #optional
+    restart: unless-stopped
+
+#networks:
+#    default:
+#        driver: bridge
+#        enable_ipv6: true
+#        driver_opts:
+#            com.docker.network.bridge.enable_icc: "true"
+#            com.docker.network.bridge.enable_ip_masquerade: "true"
+#            com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
+#            com.docker.network.driver.mtu: "1390"
+#        ipam:
+#            driver: default
+#            config:
+#                - subnet: 172.16.5.0/24
+#                  gateway: 172.16.5.1
+#                - subnet: fd5f:c26e:7746:f664::/64
+#                  gateway: fd5f:c26e:7746:f664::1

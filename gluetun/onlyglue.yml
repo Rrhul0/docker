@@ -1,0 +1,17 @@
+version: '3'
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ../docker-data/gluetun/nl-free-88.protonvpn.net.udp.ovpn:/gluetun/custom.ovpn:ro
+    environment:
+      - OPENVPN_USER=Ktb4d2wX8TDWv61g
+      - OPENVPN_PASSWORD=o6eKAEcCgfL2aqJX1dul7OW6PlytfapK
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=openvpn
+      - OPENVPN_CUSTOM_CONFIG=/gluetun/custom.ovpn
+#      - SERVER_COUNTRIES=Netherlands
+#      - FREE_ONLY=on

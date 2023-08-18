@@ -1,0 +1,58 @@
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+    volumes:
+      - plex:/config
+      - /home/ubuntu/media/TV:/tv
+      - /home/ubuntu/media/Movies:/movies
+      - /home/ubuntu/media2/TV:/tv2
+      - /home/ubuntu/media2/Movies:/movies2
+      - /home/ubuntu/media/Music:/music
+    restart: unless-stopped
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    volumes:
+      - jellyfin:/config
+      - /home/ubuntu/media/TV:/data/tvshows
+      - /home/ubuntu/media/Movies:/data/movies
+      - /home/ubuntu/media2/TV:/data/tvshows2
+      - /home/ubuntu/media2/Movies:/data/movies2
+      - /home/ubuntu/media/Music:/data/music
+    ports:
+      - 8024:8096
+#      - 8920:8920 #optional
+#      - 7359:7359/udp #optional
+#      - 1900:1900/udp #optional
+    restart: unless-stopped
+
+  filebrowser:
+    image: 80x86/filebrowser:arm64
+    container_name: filebrowser
+    environment:
+      - PUID=1001
+      - PGID=1001
+      - WEB_PORT=8025
+      - TZ=Asia/Kolkata
+    volumes:
+      - /home/ubuntu:/myfiles
+      - filebrowser:/config
+    ports:
+      - 8025:8025
+    restart: unless-stopped
+
+volumes:
+    plex: {}
+    jellyfin: {}
+    filebrowser: {}

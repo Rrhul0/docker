@@ -1,0 +1,31 @@
+[Unit]
+Description=Gmedia RClone Mount Service2
+After=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/rclone mount \
+  --config=/home/ubuntu/.config/rclone/rclone.conf \
+  --log-level=INFO \
+  --log-file=/home/ubuntu/rclone/rclone-mount2.log \
+  --user-agent=plexdrivemediaserver2 \
+  --umask=002 \
+  --gid=1000 \
+  --uid=1000 \
+  --allow-other \
+  --timeout=1h \
+  --poll-interval=15s \
+  --dir-cache-time=1000h \
+  --cache-dir=/home/ubuntu/rclone/cache \
+  --vfs-cache-mode=full \
+  --vfs-cache-max-size=80G \
+  --vfs-cache-max-age=6h \
+  TD2: /home/ubuntu/media2
+ExecStop=/bin/fusermount -uz /home/ubuntu/media2
+Restart=on-abort
+RestartSec=5
+StartLimitInterval=60s
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
